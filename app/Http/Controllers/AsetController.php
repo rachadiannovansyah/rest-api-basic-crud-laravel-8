@@ -16,7 +16,7 @@ class AsetController extends Controller
      */
     private function resSuccess($message, $data) {
         $res = response([
-            'status' => 'OK',
+            'success' => true,
             'message' => $message,
             'data' => $data
         ], 201);
@@ -33,8 +33,9 @@ class AsetController extends Controller
      */
     private function resFailed($message){
         $res = response([
-            'status' => 'Not Found',
+            'success' => false,
             'message' => $message,
+            'data' => null
         ], 404);
 
         return $res;
