@@ -8,34 +8,62 @@ use App\Models\User;
 
 class ReservationController extends Controller
 {
+    /**
+     * Function to provided respond payload
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @param trueOrFalse bool
+     * @param message string
+     * @param data object
+     * @return JSON
+     */
+    private function respondPayload($trueOrFalse, $message, $data) {
+        $res = response([
+            'success' => $trueOrFalse,
+            'message' => $message,
+            'data' => $data
+        ],
+        $trueOrFalse === true ? 201 : 500);
+
+        return $res;
+    }
+
+    /**
+     * Function to get all data
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @return JSON
+     */
     public function getAll() {
         $reservations = auth()->user()->reservations;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'data was found!',
-            'data' => $reservations
-        ]);
+        return $this->respondPayload(true, 'data was found!', $reservations);
     }
 
+    /**
+     * Function to get data by id
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @param id integer
+     * @return JSON
+     */
     public function getById($id) {
         $reservation = auth()->user()->reservations()->find($id);
 
         if (!$reservation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'data with id ' . $id . ' not found!',
-                'data' => null
-            ], 400);
+            return $this->respondPayload(false, 'data with id '.$id.' not found!', null);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'data was found!',
-            'data' => $reservation->toArray()
-        ], 200);
+        return $this->respondPayload(true, 'data was found!', $reservation);
     }
 
+    /**
+     * Function to store data
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @param Request object
+     * @return JSON
+     */
     public function store(Request $request) {
         $this->validate($request, [
             'judul_reservation' => 'required',
@@ -49,65 +77,52 @@ class ReservationController extends Controller
         $reservation->status = $request->status;
         
         if (auth()->user()->reservations()->save($reservation)) {
-            return response()->json([
-                'success' => true,
-                'message' => 'data has been successfully added!',
-                'data' => $reservation
-            ], 201);
+            return $this->respondPayload(true, 'data has been successfully added!', $reservation);
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'add data is denied!',
-                'data' => null
-            ], 500);
+            return $this->respondPayload(false, 'add data is denied!', null);
         }
     }
 
+    /**
+     * Function to update data exist
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @param Request object
+     * @param id integer
+     * @return JSON
+     */
     public function update(Request $request, $id) {
         $reservation = auth()->user()->reservations()->find($id);
 
         if (!$reservation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'data with id ' . $id . ' not found!',
-                'data' => null
-            ], 400);
+            return $this->respondPayload(false, 'data with id '.$id.' not found!', null);
         }
 
         $updateReservation = $reservation->fill($request->all())->save();
 
         if ($updateReservation) {
-            return response()->json([
-                'success' => true,
-                'message' => 'data has been successfully updated!',
-                'data' => $reservation
-            ], 201);
+            return $this->respondPayload(true, 'data has been successfully updated!', $reservation);
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'data is could not be updated!',
-                'data' => null
-            ], 500);
+            return $this->respondPayload(false, 'data is could not be updated!', null);
         }
     }
 
+    /**
+     * Function to delete data by id
+     * @author by SedekahCode
+     * @since Januari 2021
+     * @param id integer
+     * @return JSON
+     */
     public function destroy($id) {
         $reservation = auth()->user()->reservations()->find($id);
 
         if (!$reservation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'data with id ' . $id . ' not found!',
-                'data' => null
-            ], 400);
+            return $this->respondPayload(false, 'data with id '.$id.' not found!', null);
         }
 
         $deleteReservation = $reservation->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'data has been successfully deleted!',
-            'data' => null
-        ], 200);
+        return $this->respondPayload(true, 'data has been successfully deleted!', null);
     }
 }
