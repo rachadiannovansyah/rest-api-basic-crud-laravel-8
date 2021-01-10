@@ -8,35 +8,21 @@ use App\Models\Aset;
 class AsetController extends Controller
 {
     /**
-     * Function to provided payload success
+     * Function to provided respond payload
      * @author by SedekahCode
      * @since Januari 2021
-     * @request message string
-     * @request $data object
+     * @param trueOrFalse bool
+     * @param message string
+     * @param data object
+     * @return JSON
      */
-    private function resSuccess($message, $data) {
+    private function respondPayload($trueOrFalse, $message, $data) {
         $res = response([
-            'success' => true,
+            'success' => $trueOrFalse,
             'message' => $message,
             'data' => $data
-        ], 201);
-
-        return $res;
-    }
-
-    /**
-     * Function to provided payload failed
-     * @author by SedekahCode
-     * @since Januari 2021
-     * @request message string
-     * @request $data object
-     */
-    private function resFailed($message){
-        $res = response([
-            'success' => false,
-            'message' => $message,
-            'data' => null
-        ], 404);
+        ],
+        $trueOrFalse === true ? 201 : 500);
 
         return $res;
     }
@@ -45,31 +31,34 @@ class AsetController extends Controller
      * Function to get all data
      * @author by SedekahCode
      * @since Januari 2021
+     * @return JSON
      */
     public function getAll() {
         $result = Aset::all();
 
-        return response()->json($result, 200);
+        return $this->respondPayload(true, 'data was found!', $result);
     }
 
     /**
      * Function to get data by id
      * @author by SedekahCode
      * @since Januari 2021
+     * @return JSON
      */
     public function getById($id) {
         // check exists aset
         $checkExists = Aset::firstWhere('aset_id', $id);
-        if (!$checkExists) { return $this->resFailed('Aset is not found', null); }
+        if (!$checkExists) { return $this->respondPayload(false, 'data not found!', null); }
 
-        return $this->resSuccess('Aset was found!', $checkExists);
+        return $this->respondPayload(true, 'data was found!', $checkExists);
     }
 
     /**
-     * Function to save new data
+     * Function to get data by id
      * @author by SedekahCode
      * @since Januari 2021
-     * @request request object
+     * @param id integer
+     * @return JSON
      */
     public function store(Request $request) {
         $newAset = new Aset();
@@ -80,15 +69,16 @@ class AsetController extends Controller
         $newAset->description = $request->description;
         $newAset->save();
         
-        return $this->resSuccess('Aset has been successfully saved', $newAset);
+        return $this->respondPayload(true, 'data has been successfully added', $newAset);
     }
 
     /**
-     * Function to update existing data
+     * Function to update data exist
      * @author by SedekahCode
      * @since Januari 2021
-     * @request request object
-     * @request id string
+     * @param Request object
+     * @param id integer
+     * @return JSON
      */
     public function update(Request $request, $id) {
         // check exists aset
@@ -103,26 +93,27 @@ class AsetController extends Controller
             $getAset->description = $request->description ? $request->description : $getAset->description;
             $getAset->save();
     
-            return $this->resSuccess('Aset has been successfully updated', $getAset);
+            return $this->respondPayload(true, 'data has been successfully updated!', $getAset);
         } else {
-            return $this->resFailed('Aset is not exists');
+            return $this->respondPayload(false, 'data is not found!');
         }
     }
 
-     /**
-     * Function to delete data
+    /**
+     * Function to delete data by id
      * @author by SedekahCode
      * @since Januari 2021
-     * @request id string
+     * @param id integer
+     * @return JSON
      */
     public function destroy($id) {
         // check exists aset
         $checkExists = Aset::firstWhere('aset_id', $id);
         if ($checkExists) {
             Aset::destroy($id);
-            return $this->resSuccess('Aset has been successfully deleted', null);
+            return $this->respondPayload(true, 'data has been successfully deleted!', null);
         } else {           
-            return $this->resFailed('Aset is not exists');
+            return $this->respondPayload(false, 'data not found!', null);
         }
     }
 }
